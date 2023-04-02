@@ -1,5 +1,6 @@
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/spm_v4/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/spm_v4/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/eem_v1/inc/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/
