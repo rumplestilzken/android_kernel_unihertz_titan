@@ -87,7 +87,7 @@ enum {
 	IMAGE_HV_MIRROR
 };
 
-enum MSDK_SCENARIO_ID_ENUM {
+typedef enum MSDK_SCENARIO_ID_ENUM {
 	MSDK_SCENARIO_ID_CAMERA_PREVIEW = 0,
 	MSDK_SCENARIO_ID_CAMERA_CAPTURE_JPEG,
 	MSDK_SCENARIO_ID_VIDEO_PREVIEW,
@@ -106,7 +106,7 @@ enum MSDK_SCENARIO_ID_ENUM {
 	MSDK_SCENARIO_ID_CAMERA_3D_VIDEO,
 	MSDK_SCENARIO_ID_TV_OUT,
 	MSDK_SCENARIO_ID_MAX,
-};
+} MSDK_SCENARIO_ID_ENUM;
 
 
 enum ACDK_CAMERA_OPERATION_MODE_ENUM {
@@ -771,7 +771,7 @@ struct ACDK_SENSOR_MCLK_STRUCT {
 	MUINT8  TG;
 };
 
-struct SENSOR_WINSIZE_INFO_STRUCT {
+typedef struct SENSOR_WINSIZE_INFO_STRUCT {
 	MUINT16 full_w;
 	MUINT16 full_h;
 	MUINT16 x0_offset;
@@ -788,7 +788,7 @@ struct SENSOR_WINSIZE_INFO_STRUCT {
 	MUINT16 y2_tg_offset;
 	MUINT16 w2_tg_size;
 	MUINT16 h2_tg_size;
-};
+} SENSOR_WINSIZE_INFO_STRUCT;
 
 struct SENSOR_WINSIZE_STRUCT {
 	MUINT32 SensorId;
@@ -884,7 +884,7 @@ struct SET_SENSOR_ISO {
 	MUINT32 ISO;
 };
 
-struct SET_PD_BLOCK_INFO_T {
+typedef struct SET_PD_BLOCK_INFO_T {
 	/* start offset of first PD block */
 	MUINT32 i4OffsetX;
 	MUINT32 i4OffsetY;
@@ -906,7 +906,7 @@ struct SET_PD_BLOCK_INFO_T {
 	/* 1: 1st line is long exposure, 0: 1st line is short exposure*/
 	MUINT32 i4LeFirst;
 	MUINT32 i4Crop[10][2]; /* [scenario][crop] -> (xcrop, ycrop) */
-};
+} SET_PD_BLOCK_INFO_T;
 
 enum IMGSENSOR_HDR_SUPPORT_TYPE_ENUM {
 	HDR_SUPPORT_NA = 0,
