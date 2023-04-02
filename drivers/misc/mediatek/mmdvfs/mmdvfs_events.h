@@ -73,7 +73,7 @@ TRACE_EVENT(mmqos__update_larb,
 
 #undef TRACE_INCLUDE_FILE
 #undef TRACE_INCLUDE_PATH
-#define TRACE_INCLUDE_PATH .
+#define TRACE_INCLUDE_PATH ../../drivers/misc/mediatek/mmdvfs/
 #define TRACE_INCLUDE_FILE mmdvfs_events
 
 /* This part must be outside protection */
