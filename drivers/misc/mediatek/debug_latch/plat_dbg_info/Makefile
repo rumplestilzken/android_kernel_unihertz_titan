@@ -10,8 +10,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
-
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/debug_latch/plat_db_info/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/debug_latch/plat_dbg_info/
 
 # Do not change the following order
 obj-y += plat_dbg_info.o
