@@ -16,6 +16,8 @@ ccflags-y += -DMET_SUPPORT
 ccflags-y += -DMET_USER_EVENT_SUPPORT
 endif
 
+ccflags-y += -Wmemset-elt-size
+
 ccflags-y += \
 	-I$(CPUFREQ_ROOT_DIR)/inc \
 	-I$(CPUFREQ_ROOT_DIR)/src/mach/$(CONFIG_MTK_PLATFORM) \
@@ -39,4 +41,3 @@ ccflags-y += \
 # main
 obj-y += mtk_cm_mgr.o
 obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
-
