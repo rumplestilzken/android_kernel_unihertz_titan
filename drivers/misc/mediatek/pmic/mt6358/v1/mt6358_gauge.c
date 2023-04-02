@@ -1028,40 +1028,44 @@ static int fgauge_read_current(
 	dvalue = (unsigned int) Temp_Value;
 
 	if (*fg_is_charging == true)
+	{
 		bm_trace("[%s]curr(charging) = %d mA\r\n",
 		__func__,
 			 dvalue);
+	}
 	else
+	{
 		bm_trace("[%s]curr(discharging) = %d mA\r\n",
 		__func__,
 			 dvalue);
+    }
 
-		/* Auto adjust value */
-		if (gauge_dev->fg_cust_data->r_fg_value != 100) {
-			bm_trace(
-			"[%s] Auto adjust value due to the Rfg is %d Ori curr=%d\n",
-			__func__,
-			gauge_dev->fg_cust_data->r_fg_value, dvalue);
+    /* Auto adjust value */
+    if (gauge_dev->fg_cust_data->r_fg_value != 100) {
+        bm_trace(
+        "[%s] Auto adjust value due to the Rfg is %d Ori curr=%d\n",
+        __func__,
+        gauge_dev->fg_cust_data->r_fg_value, dvalue);
 
-			dvalue = (dvalue * 100) /
-				gauge_dev->fg_cust_data->r_fg_value;
+        dvalue = (dvalue * 100) /
+            gauge_dev->fg_cust_data->r_fg_value;
 
-			bm_trace("[%s] new current=%d\n",
-				__func__,
-				dvalue);
-		}
+        bm_trace("[%s] new current=%d\n",
+            __func__,
+            dvalue);
+    }
 
-		bm_trace("[%s] ori current=%d\n",
-			__func__, dvalue);
+    bm_trace("[%s] ori current=%d\n",
+        __func__, dvalue);
 
-		dvalue =
-		((dvalue * gauge_dev->fg_cust_data->car_tune_value) / 1000);
+    dvalue =
+    ((dvalue * gauge_dev->fg_cust_data->car_tune_value) / 1000);
 
-		bm_debug("[%s] final current=%d (ratio=%d)\n",
-			__func__,
-			 dvalue, gauge_dev->fg_cust_data->car_tune_value);
+    bm_debug("[%s] final current=%d (ratio=%d)\n",
+        __func__,
+         dvalue, gauge_dev->fg_cust_data->car_tune_value);
 
-		*data = dvalue;
+    *data = dvalue;
 
 	return 0;
 }
