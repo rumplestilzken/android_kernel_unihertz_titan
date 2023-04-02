@@ -11,8 +11,8 @@
 # GNU General Public License for more details.
 #
 
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/debug_latch/plat_db_info/
+
 # Do not change the following order
 obj-y += plat_dbg_info.o
 obj-y += plat_sram_flag.o
-
-
