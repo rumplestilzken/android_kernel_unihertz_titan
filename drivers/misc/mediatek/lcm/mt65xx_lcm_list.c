@@ -1272,6 +1272,10 @@ struct LCM_DRIVER *lcm_driver_list[] = {
 #if defined(NT51021H_WUXGA_VDO_ONCELL_BOE)
 	&nt51021h_wuxga_vdo_oncell_boe_lcm_drv,
 #endif
+
+#if defined(A61QWERTY46)
+    &A61Qwerty46_lcm_drv,
+#endif
 };
 
 unsigned char lcm_name_list[][128] = {
@@ -1351,6 +1355,10 @@ unsigned char lcm_name_list[][128] = {
 
 #if defined(NT35695B_FHD_DSI_VDO_AUO_RT5081_HDP_20_9)
 	"nt35695B_fhd_dsi_vdo_auo_rt5081_hdp_20_9_drv",
+#endif
+
+#if defined(A61Qwerty46)
+    "A61Qwerty46",
 #endif
 };
 
