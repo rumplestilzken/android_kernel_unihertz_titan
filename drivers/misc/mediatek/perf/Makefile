@@ -13,6 +13,7 @@
 
 LINUXINCLUDE += -include $(srctree)/kernel/sched/sched.h
 
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/perf/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/dramc/$(MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/vcorefs_v3/
 ccflags-y += -I$(srctree)/drivers/devfreq/
