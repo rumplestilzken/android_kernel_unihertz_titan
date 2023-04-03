@@ -4209,7 +4209,7 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 	goodix_fp: fingerprint {
 		compatible = "mediatek,goodix-fp";
 	};
-	
+
 	finger_proc {
 		compatible = "mediatek,teksun-finger_proc";
 	};
@@ -4291,7 +4291,7 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 	nfc:nfc {
 		compatible = "mediatek,nfc-gpio-v2";
 		gpio-rst = <18>;
-		gpio-rst-std = <&pio 18a 0x0>;
+		gpio-rst-std = <&pio 18 0x0>;
 		gpio-irq = <21>;
 		gpio-irq-std = <&pio 21 0x0>;
 	};
