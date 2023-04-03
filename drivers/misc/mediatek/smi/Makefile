@@ -30,6 +30,7 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/sspm/$(MTK_PLATFORM)/
 
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/$(CONFIG_MTK_PLATFORM)
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/smi/
 
 ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6739"))
 ccflags-y += -DSMI_ZIO
