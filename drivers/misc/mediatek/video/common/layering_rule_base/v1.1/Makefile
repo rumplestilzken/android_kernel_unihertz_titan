@@ -24,5 +24,4 @@ ccflags-y += \
 ccflags-y += \
                                 -I$(srctree)/drivers/misc/mediatek/cmdq/v3/ \
                                 -I$(srctree)/drivers/misc/mediatek/cmdq/v3/$(MTK_PLATFORM)/
-
-
+																-I$(srctree)/drivers/misc/mediatek/video/common/layering_rule_base/
