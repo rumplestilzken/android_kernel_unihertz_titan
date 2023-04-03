@@ -14,6 +14,7 @@
 *.bin
 *.bz2
 *.c.[012]*.*
+*.cfg
 *.dtb
 *.dtb.S
 *.dwo
