@@ -1,6 +1,7 @@
 #
 # Makefile for the phy drivers.
 #
+ccflags-y += -I$(srctree)/drivers/phy/mediatek/
 
 obj-$(CONFIG_PHY_MTK_TPHY)		+= phy-mtk-tphy.o
 
