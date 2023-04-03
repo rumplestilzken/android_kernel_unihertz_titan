@@ -46,6 +46,8 @@ static const char * const mtk_gpio_functions[] = {
 	"func12", "func13", "func14", "func15",
 };
 
+struct mtk_pinctrl *pctl = NULL;
+
 static int mtk_pinmux_gpio_request_enable(struct pinctrl_dev *pctldev,
 					  struct pinctrl_gpio_range *range,
 					  unsigned int pin)
@@ -1002,6 +1004,7 @@ int mtk_paris_pinctrl_probe(struct platform_device *pdev,
 	}
 
 	platform_set_drvdata(pdev, hw);
+    pctl = hw;
 
 	return 0;
 }
