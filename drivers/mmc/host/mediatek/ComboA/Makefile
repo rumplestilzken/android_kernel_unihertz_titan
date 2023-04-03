@@ -21,6 +21,7 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/pmic/
 #workaround for include mmc/card/queue.h and mmc/core/core.h
 ccflags-y += -I$(srctree)/drivers
+ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/ComboA/
 ccflags-y += -I$(srctree)/drivers/mmc/host/mediatek/ComboA/$(MTK_PLATFORM)
 
 ifeq ($(CONFIG_MTK_PLATFORM), "mt6739")
@@ -66,4 +67,3 @@ msdc-y += $(MTK_PLATFORM)/autok_dvfs.o
 ifeq ($(CONFIG_FPGA_EARLY_PORTING),y)
 msdc-y += $(MTK_PLATFORM)/msdc_fpga_io.o
 endif
-
