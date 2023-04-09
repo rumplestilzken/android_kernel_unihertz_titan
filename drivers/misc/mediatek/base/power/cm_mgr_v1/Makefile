@@ -16,7 +16,7 @@ ccflags-y += -DMET_SUPPORT
 ccflags-y += -DMET_USER_EVENT_SUPPORT
 endif
 
-ccflags-y += -Wmemset-elt-size
+#ccflags-y += -Wmemset-elt-size
 
 ccflags-y += \
 	-I$(CPUFREQ_ROOT_DIR)/inc \
