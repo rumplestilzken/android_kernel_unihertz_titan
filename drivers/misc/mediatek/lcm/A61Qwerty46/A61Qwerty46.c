@@ -44,7 +44,9 @@ extern void agold_gpio_set(unsigned offset, int value);
 
 static struct LCM_UTIL_FUNCS lcm_util;
 
+#define SET_RESET_PIN(v)    (lcm_util.set_reset_pin((v)))
 #define MDELAY(n)       (lcm_util.mdelay(n))
+#define UDELAY(n)       (lcm_util.udelay(n))
 
 #define dsi_set_cmdq_V22(cmdq, cmd, count, ppara, force_update) \
 	lcm_util.dsi_set_cmdq_V22(cmdq, cmd, count, ppara, force_update)
@@ -66,11 +68,14 @@ static struct LCM_UTIL_FUNCS lcm_util;
 /* static unsigned char lcd_id_pins_value = 0xFF; */
 //static const unsigned char LCD_MODULE_ID = 0x01;
 #define LCM_DSI_CMD_MODE									1
-#define FRAME_WIDTH                                     (720)
-#define FRAME_HEIGHT                                    (720)
+#define FRAME_WIDTH                                     (1440)
+#define FRAME_HEIGHT                                    (1440)
 
-#define REGFLAG_DELAY       0xFFE
-#define REGFLAG_END_OF_TABLE    0x100
+#define REGFLAG_DELAY       0xFFFC
+#define REGFLAG_UDELAY  0xFFFB
+#define REGFLAG_END_OF_TABLE    0xFFFD
+#define REGFLAG_RESET_LOW   0xFFFE
+#define REGFLAG_RESET_HIGH  0xFFFF
 
 #ifndef TRUE
 #define TRUE 1
@@ -83,54 +88,32 @@ static struct LCM_UTIL_FUNCS lcm_util;
 struct LCM_setting_table {
 	unsigned int cmd;
 	unsigned char count;
-	unsigned char para_list[11];
+	unsigned char para_list[30];
 };
 
-static struct LCM_setting_table init_setting[] =
-{
-  { 176, 1, { 0 } },
-  { 228, 5, { 0, 0, 0, 0, 8 } },
-  { 208, 3, { 69, 69, 113 } },
-  { 17, 0, {} },
-  { 208, 3, { 82, 74, 113 } },
-  { 190, 8, { 255, 15, 0, 24, 4, 4, 0, 93 } },
-  { 187, 1, { 47 } },
-  { 176, 1, { 3 } },
-  { REGFLAG_DELAY, 50, {} },
-  { 41, 0, {} },
-  { REGFLAG_DELAY, 20, {} },
-  { REGFLAG_END_OF_TABLE, 0, {} }
+static struct LCM_setting_table init_setting[] = {
+    {0x53, 1, {0x2c}},
+    {0x2a, 4, {0x00, 0x00, 0x05, 0x9f}},
+    {0x2b, 4, {0x00, 0x00, 0x05, 0x9f}},
+    {0x35, 1, {}},
+    {0x36, 1, {}},
+    {0x3a, 1, {0x77}},
+    {0x51, 1, {0xff}},
+    {0x44, 2, {0x03, 0xe8}},
+    {0x55, 1, {0x01}},
+    {0x5e, 1, {}},
+    {0x29, 1, {}},
+    {REGFLAG_DELAY, 20, {}},
+    {0x11, 1, {}},
+    {REGFLAG_DELAY, 20, {}},
+    {0x2a, 4, {0x00, 0x00, 0x04, 0x38}},
+    {0x2b, 4, {0x00, 0x00, 0x05, 0x9f}},
+    {0x51, 1, {0xff}},
+    {REGFLAG_END_OF_TABLE, 0, {}}
 };
 
-static struct LCM_setting_table preinit_setting[] = {
-    { 1, 1, { 0 } },
-    { REGFLAG_DELAY, 2, {} },
-    { REGFLAG_END_OF_TABLE, 0, {} }
-};
-
-static struct LCM_setting_table suspend_setting[] = {
-	{ 40, 0, {} },
-	{ REGFLAG_DELAY, 20, {} },
-	{ 16, 0, {} },
-	{ REGFLAG_DELAY, 55, {} },
-	{ REGFLAG_END_OF_TABLE, 0, {} }
-};
-
-static struct LCM_setting_table suspend_setting_2[] = {
-	{ 176, 1, { 0 } },
-	{ REGFLAG_END_OF_TABLE, 0, {} }
-};
-
-static int32_t agold_power_setting_1[] = {
-    0, -1, 0xAF, 0xB1, -1, -1, 0
-};
-
-static int32_t agold_power_setting_2[] = {
-    -1, 0, 0xAF, 0xB1, -1, -1, 0
-};
-
-static int32_t agold_power_setting_3[] = {
-    -1, -1, 0x19, -1, 0xA, 0xA, 0
+static int agold_power_setting[] = {
+	0, 1, 175, -1, -1, -1
 };
 
 static struct regulator *lcm_ldo;
@@ -159,7 +142,7 @@ int lcd_ldo_regulator_init(void)
 	return ret; /* must be 0 */
 }
 
-int agold_lcmldo_enable(void)
+int lcd_ldo_enable(void)
 {
 	int ret = 0;
 	int retval = 0;
@@ -181,7 +164,7 @@ int agold_lcmldo_enable(void)
 	return retval;
 }
 
-int agold_lcmldo_disable(void)
+int lcd_ldo_disable(void)
 {
 	int ret = 0;
 	int retval = 0;
@@ -196,43 +179,6 @@ int agold_lcmldo_disable(void)
 	return retval;
 }
 
-extern int agold_display_bias_enable(int pos_factor, int neg_factor);
-
-void agold_lcm_power_on(int32_t *agold_power_setting)
-{
-	if (!agold_power_setting[0]) {
-		agold_gpio_set(agold_power_setting[2], 1);
-	}
-
-	if (agold_power_setting[1] == 1) {
-		agold_lcmldo_enable();
-	} else if (!agold_power_setting[1]) {
-		agold_gpio_set(agold_power_setting[3], 1);
-	}
-
-	if (agold_power_setting[4] != -1 && agold_power_setting[5] != -1) {
-		agold_display_bias_enable(agold_power_setting[4], agold_power_setting[5]);
-	}
-}
-
-void agold_lcm_power_off(int32_t *agold_power_setting)
-{
-	if (!agold_power_setting[0] && !agold_power_setting[6]) {
-		agold_gpio_set(agold_power_setting[2], 0);
-	}
-
-	if (agold_power_setting[1] == 1 ) {
-		agold_lcmldo_disable();
-	} else if (!agold_power_setting[1]) {
-		agold_gpio_set(agold_power_setting[3], 0);
-	}
-
-	if (agold_power_setting[4] != -1 && agold_power_setting[5] != -1) {
-		display_bias_disable();
-		agold_lcmldo_disable();
-	}
-}
-
 static void push_table(void *cmdq, struct LCM_setting_table *table,
 	unsigned int count, unsigned char force_update)
 {
@@ -245,15 +191,25 @@ static void push_table(void *cmdq, struct LCM_setting_table *table,
 		switch (cmd) {
 
 			case REGFLAG_DELAY:
-                MDELAY(table[i].count);
+				if (table[i].count <= 10)
+					MDELAY(table[i].count);
+				else
+					MDELAY(table[i].count);
+				break;
+
+			case REGFLAG_UDELAY:
+				UDELAY(table[i].count);
+				break;
+
 			case REGFLAG_END_OF_TABLE:
 				break;
 
 			default:
-				dsi_set_cmdq_V22(0, cmd, table[i].count, table[i].para_list, force_update);
+			dsi_set_cmdq_V2(cmd, table[i].count, table[i].para_list, force_update);
 		}
 	}
 }
+
 
 static void lcm_set_util_funcs(const struct LCM_UTIL_FUNCS *util)
 {
@@ -263,98 +219,126 @@ static void lcm_set_util_funcs(const struct LCM_UTIL_FUNCS *util)
 static void lcm_get_params(struct LCM_PARAMS *params)
 {
 	memset(params, 0, sizeof(struct LCM_PARAMS));
-	params->type   = LCM_TYPE_DSI;
 
-	params->width  = FRAME_WIDTH;
-	params->height = FRAME_HEIGHT;
-	params->physical_width = 56;
-	params->physical_height = 56;
+    params->type   = LCM_TYPE_DSI;
 
-#if 0
-	// enable tearing-free
-	params->dbi.te_mode 			= LCM_DBI_TE_MODE_VSYNC_OR_HSYNC;
-#endif
-	params->dbi.io_driving_current = LCM_DRIVING_CURRENT_4MA;
-	//params->dbi.te_edge_polarity		= LCM_POLARITY_RISING;
+    params->width  = FRAME_WIDTH;
+    params->height = FRAME_HEIGHT;
+	params->physical_width = 81;
+	params->physical_height = 81;
+    // enable tearing-free
+    params->dbi.te_mode 			= LCM_DBI_TE_MODE_VSYNC_ONLY;
+    params->dbi.io_driving_current = 2;
+    //params->dbi.te_edge_polarity		= LCM_POLARITY_RISING;
 
-	params->dsi.mode   = BURST_VDO_MODE;
-	//params->dsi.switch_mode   = SYNC_PULSE_VDO_MODE;
+    params->dsi.mode   = CMD_MODE;
+    params->dsi.switch_mode   = SYNC_PULSE_VDO_MODE;
 
-	// DSI
-	/* Command mode setting */
-	//1 Three lane or Four lane
-	params->dsi.LANE_NUM				= LCM_TWO_LANE;
+    // DSI
+    /* Command mode setting */
+    //1 Three lane or Four lane
+    params->dsi.LANE_NUM				= LCM_FOUR_LANE;
 
-	//The following defined the fomat for data coming from LCD engine.
-	//params->dsi.data_format.color_order = LCM_COLOR_ORDER_RGB;
-	params->dsi.data_format.trans_seq   = 0;
-	//params->dsi.data_format.padding     = LCM_DSI_PADDING_ON_LSB;
-	params->dsi.data_format.format      = LCM_DSI_FORMAT_RGB888;
+    //The following defined the fomat for data coming from LCD engine.
+    params->dsi.data_format.color_order = LCM_COLOR_ORDER_RGB;
+    params->dsi.data_format.trans_seq   = LCM_DSI_TRANS_SEQ_MSB_FIRST;
+    params->dsi.data_format.padding     = LCM_DSI_PADDING_ON_LSB;
+    params->dsi.data_format.format      = LCM_DSI_FORMAT_RGB888;
 
-	// Highly depends on LCD driver capability.
-	// Not support in MT6573
-	params->dsi.packet_size=256;
-	// Video mode setting
-	params->dsi.intermediat_buffer_num = 0; /* unused by DSI driver */
+    // Highly depends on LCD driver capability.
+    // Not support in MT6573
+    params->dsi.packet_size=256;
+    // Video mode setting
+    params->dsi.intermediat_buffer_num = 2;
 
-	params->dsi.PS=LCM_PACKED_PS_24BIT_RGB888;
+    params->dsi.PS=LCM_PACKED_PS_24BIT_RGB888;
 
-	//params->dsi.word_count=FRAME_WIDTH*3;	//DSI CMD mode need set these two bellow params, different to 6577
+    //params->dsi.word_count=FRAME_WIDTH*3;	//DSI CMD mode need set these two bellow params, different to 6577
 
-	params->dsi.vertical_sync_active				= 3;	//10
-	params->dsi.vertical_backporch = 4;
-	params->dsi.vertical_frontporch = 9;
+	params->dsi.vertical_sync_active				= 4;	//10
+	params->dsi.vertical_backporch = 2;
+	params->dsi.vertical_frontporch = 10;
 	params->dsi.vertical_active_line				= FRAME_HEIGHT;
 
-	params->dsi.horizontal_sync_active				= 16;
-	params->dsi.horizontal_backporch				= 16;
-	params->dsi.horizontal_frontporch				= 96;
+	params->dsi.horizontal_sync_active				= 10;
+	params->dsi.horizontal_backporch				= 25;
+	params->dsi.horizontal_frontporch				= 25;
 	params->dsi.horizontal_active_pixel				= FRAME_WIDTH;
 
-	params->dsi.PLL_CLOCK = 230;
+	params->dsi.PLL_CLOCK=430;
 	params->dsi.ssc_disable = 1;
+}
+
+static void lcm_power_on(void)
+{
+	LCM_LOGI("lcm_power_on start\n");
+	if (!agold_power_setting[0])
+		agold_gpio_set(agold_power_setting[2], 1);
+
+	if (agold_power_setting[1] == 1) {
+		lcd_ldo_enable();
+	} else if (!agold_power_setting[1]) {
+		agold_gpio_set(agold_power_setting[3], 1u);
+	}
+
+	if (agold_power_setting[4] != -1 && agold_power_setting[5] != -1)
+		display_bias_enable();
+
+	LCM_LOGI("lcm_power_on end\n");
+}
+
+static void lcm_init_power(void)
+{
+	LCM_LOGD("lcm_init_power enter\n");
+	lcm_power_on();
+}
+
+static void lcm_suspend_power(void)
+{
+	LCM_LOGD("lcm_suspend_power enter\n");
+}
+
+static void lcm_resume_power(void)
+{
+	LCM_LOGD("lcm_resume_power enter\n");
+	lcm_power_on();
 }
 
 static void lcm_init(void)
 {
-	LCM_LOGD("%s enter\n", __func__);
-
-	agold_lcm_power_on(agold_power_setting_1);
-	MDELAY(10);
-	agold_lcm_power_on(agold_power_setting_2);
+	LCM_LOGD("[Kernel]enter lcm_init\n");
+	MDELAY(1);
+	agold_gpio_set(157, 1);
 	MDELAY(5);
-	agold_gpio_set(45, 0);
-	MDELAY(10);
+	agold_gpio_set(153, 1);
+	MDELAY(5);
+	agold_gpio_set(18, 1);
+	MDELAY(5);
+	agold_gpio_set(18, 0);
+	MDELAY(5);
+	agold_gpio_set(18, 1);
+	MDELAY(5);
 	agold_gpio_set(45, 1);
-	MDELAY(10);
-
-	push_table(0, preinit_setting, sizeof(preinit_setting) / sizeof(struct LCM_setting_table), 1);
-
-	MDELAY(15);
-	agold_lcm_power_on(agold_power_setting_3);
 	MDELAY(5);
-
-	push_table(0, init_setting, sizeof(init_setting) / sizeof(struct LCM_setting_table), 1);
+	push_table(0,init_setting, sizeof(init_setting) / sizeof(struct LCM_setting_table), 1);
 }
 
 static void lcm_suspend(void)
 {
-	LCM_LOGD("%s enter\n", __func__);
+	unsigned int data;
 
-	push_table(0, suspend_setting, sizeof(suspend_setting) / sizeof(struct LCM_setting_table), 1);
+	LCM_LOGD("lcm_suspend enter\n");
 
-	MDELAY(55);
-	agold_lcm_power_off(agold_power_setting_3);
-	MDELAY(100);
-
-	push_table(0, suspend_setting_2, sizeof(suspend_setting_2) / sizeof(struct LCM_setting_table), 1);
-
+	data = 0x280500;
+	dsi_set_cmdq(&data, 1, 1);
+	data = 0x100500;
+	dsi_set_cmdq(&data, 1, 1);
+	MDELAY(120);
 	agold_gpio_set(45, 0);
-	MDELAY(50);
-	agold_lcm_power_off(agold_power_setting_2);
-	MDELAY(2);
-	agold_lcm_power_off(agold_power_setting_1);
-	MDELAY(2);
+	SET_RESET_PIN(0);
+	MDELAY(10);
+	agold_gpio_set(157, 0);
+	MDELAY(10);
 
 	LCM_LOGD("lcm_suspend end\n");
 }
@@ -364,6 +348,41 @@ static void lcm_resume(void)
 	LCM_LOGD("enter lcm_resume\n");
 	lcm_init();
 	LCM_LOGD("lcm_resume end\n");
+}
+
+static void lcm_update(unsigned int x, unsigned int y,
+		       unsigned int width, unsigned int height)
+{
+#if (LCM_DSI_CMD_MODE)
+	unsigned int x0 = x;
+	unsigned int y0 = y;
+	unsigned int x1 = x0 + width - 1;
+	unsigned int y1 = y0 + height - 1;
+
+	unsigned char x0_MSB = ((x0>>8)&0xFF);
+	unsigned char x0_LSB = (x0&0xFF);
+	unsigned char x1_MSB = ((x1>>8)&0xFF);
+	unsigned char x1_LSB = (x1&0xFF);
+	unsigned char y0_MSB = ((y0>>8)&0xFF);
+	unsigned char y0_LSB = (y0&0xFF);
+	unsigned char y1_MSB = ((y1>>8)&0xFF);
+	unsigned char y1_LSB = (y1&0xFF);
+
+	unsigned int data_array[16];
+
+	data_array[0] = 0x00053902;
+	data_array[1] = (x1_MSB<<24)|(x0_LSB<<16)|(x0_MSB<<8)|0x2a;
+	data_array[2] = (x1_LSB);
+	dsi_set_cmdq(data_array, 3, 1);
+
+	data_array[0] = 0x00053902;
+	data_array[1] = (y1_MSB<<24)|(y0_LSB<<16)|(y0_MSB<<8)|0x2b;
+	data_array[2] = (y1_LSB);
+	dsi_set_cmdq(data_array, 3, 1);
+
+	data_array[0] = 0x002c3909;
+	dsi_set_cmdq(data_array, 1, 0);
+#endif
 }
 
 static unsigned int lcm_compare_id(void)
@@ -377,7 +396,11 @@ struct LCM_DRIVER A61Qwerty46_lcm_drv =
 	.set_util_funcs = lcm_set_util_funcs,
 	.get_params     = lcm_get_params,
 	.init           = lcm_init,
-	.compare_id     = lcm_compare_id,
+	.compare_id = lcm_compare_id,
+	.init_power = lcm_init_power,
+	.resume_power = lcm_resume_power,
+	.suspend_power = lcm_suspend_power,
 	.resume         = lcm_resume,
 	.suspend        = lcm_suspend,
+	.update		= lcm_update,
 };

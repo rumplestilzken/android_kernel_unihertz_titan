@@ -218,6 +218,21 @@ static void mtk_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	regmap_write(mtk_get_regmap(pctl, offset), reg_addr, bit);
 }
 
+void agold_gpio_set(unsigned offset, int value)
+{
+	struct gpio_chip *chip;
+
+	printk("enter agold_gpio_set(%d, %d)\n", offset, value);
+
+	if (!pctl) {
+		pr_err("pctl does not exist\n");
+		return;
+	}
+
+	chip = pctl->chip;
+	return mtk_gpio_set(chip, offset, value);
+}
+
 static int mtk_pconf_set_ies_smt(struct mtk_pinctrl *pctl, unsigned pin,
 		int value, enum pin_config_param arg)
 {
